@@ -34,7 +34,7 @@ namespace AppRunner
                     sw.WriteLine("WorkingDirectory=" + Properties.Settings.Default.WorkingDirectory);
                     sw.WriteLine("CommandLineArgs=" + Properties.Settings.Default.CommandLineArgs);
                     sw.WriteLine("Called with=" + Environment.CommandLine);
-                    MessageBox.Show( sw.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show( sw.ToString(), "AppRunner Failed To Start", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
