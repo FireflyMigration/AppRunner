@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.IO;
+using System.Runtime.InteropServices;
+
 namespace AppRunner
 {
     static class Program
@@ -14,6 +16,7 @@ namespace AppRunner
             string exeFile = "";
             string workingDir = "";
             string CommandLineArgs = "";
+            var shadowCopyFiles = false;
             try
             {
                 using (var sr = new StreamReader(Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName) + ".settings"))
@@ -39,6 +42,9 @@ namespace AppRunner
                                 case "COMMANDLINEARGS":
                                     CommandLineArgs = value;
                                     break;
+                                case "SHADOWCOPYFILES":
+                                    shadowCopyFiles = value.Equals("Y", StringComparison.InvariantCultureIgnoreCase);
+                                    break;
                                 default:
                                     
                                     throw new Exception("Unknown setting " + name + "=" + value);
@@ -51,10 +57,22 @@ namespace AppRunner
                     if (string.IsNullOrWhiteSpace(commandLine))
                         commandLine = SplitCommandLine(System.Environment.CommandLine)[1];
 
-                    p.StartInfo.Arguments = commandLine;
-                    p.StartInfo.FileName = exeFile;
-                    p.StartInfo.WorkingDirectory = workingDir;
-                    p.Start();
+                    if (shadowCopyFiles)
+                    {
+                        if (!string.IsNullOrEmpty(workingDir))
+                            Directory.SetCurrentDirectory(workingDir);
+                        var setup = AppDomain.CurrentDomain.SetupInformation;
+                        setup.ShadowCopyFiles = "true";
+                        var appDomain = AppDomain.CreateDomain(exeFile, AppDomain.CurrentDomain.Evidence, setup);
+                        appDomain.ExecuteAssembly(exeFile, CommandLineToArgs(commandLine));
+                    }
+                    else
+                    {
+                        p.StartInfo.Arguments = commandLine;
+                        p.StartInfo.FileName = exeFile;
+                        p.StartInfo.WorkingDirectory = workingDir;
+                        p.Start();
+                    }
                 }
             }
             catch (Exception ex)
@@ -66,6 +84,7 @@ namespace AppRunner
                     sw.WriteLine("WorkingDirectory=" + workingDir);
                     sw.WriteLine("CommandLineArgs=" + CommandLineArgs);
                     sw.WriteLine("Called with=" + Environment.CommandLine);
+                    sw.WriteLine("Shadow Copy Files=" + (shadowCopyFiles ? "Y" : "N"));
                     MessageBox.Show(sw.ToString(), "AppRunner Failed To Start", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -87,6 +106,32 @@ namespace AppRunner
             }
 
             return result;
+        }
+
+        [DllImport("shell32.dll", SetLastError = true)]
+        static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
+
+        public static string[] CommandLineToArgs(string commandLine)
+        {
+            int argc;
+            var argv = CommandLineToArgvW(commandLine, out argc);
+            if (argv == IntPtr.Zero)
+                throw new System.ComponentModel.Win32Exception();
+            try
+            {
+                var args = new string[argc];
+                for (var i = 0; i < args.Length; i++)
+                {
+                    var p = Marshal.ReadIntPtr(argv, i * IntPtr.Size);
+                    args[i] = Marshal.PtrToStringUni(p);
+                }
+
+                return args;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(argv);
+            }
         }
     }
 }
