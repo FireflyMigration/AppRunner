@@ -27,7 +27,7 @@ namespace AppRunner
                         var eq = line.IndexOf('=');
                         if (eq > 0)
                         {
-                            var name = line.Remove(eq).Trim().ToUpper() ;
+                            var name = line.Remove(eq).Trim().ToUpper();
                             var value = line.Substring(eq + 1).Trim();
                             if (name.StartsWith(";"))
                                 continue;
@@ -46,33 +46,33 @@ namespace AppRunner
                                     shadowCopyFiles = value.Equals("Y", StringComparison.InvariantCultureIgnoreCase);
                                     break;
                                 default:
-                                    
+
                                     throw new Exception("Unknown setting " + name + "=" + value);
                             }
                         }
                     }
+                }
 
-                    var p = new System.Diagnostics.Process();
-                    string commandLine = CommandLineArgs;
-                    if (string.IsNullOrWhiteSpace(commandLine))
-                        commandLine = SplitCommandLine(System.Environment.CommandLine)[1];
+                var p = new System.Diagnostics.Process();
+                string commandLine = CommandLineArgs;
+                if (string.IsNullOrWhiteSpace(commandLine))
+                    commandLine = SplitCommandLine(System.Environment.CommandLine)[1];
 
-                    if (shadowCopyFiles)
-                    {
-                        if (!string.IsNullOrEmpty(workingDir))
-                            Directory.SetCurrentDirectory(workingDir);
-                        var setup = AppDomain.CurrentDomain.SetupInformation;
-                        setup.ShadowCopyFiles = "true";
-                        var appDomain = AppDomain.CreateDomain(exeFile, AppDomain.CurrentDomain.Evidence, setup);
-                        appDomain.ExecuteAssembly(exeFile, CommandLineToArgs(commandLine));
-                    }
-                    else
-                    {
-                        p.StartInfo.Arguments = commandLine;
-                        p.StartInfo.FileName = exeFile;
-                        p.StartInfo.WorkingDirectory = workingDir;
-                        p.Start();
-                    }
+                if (shadowCopyFiles)
+                {
+                    if (!string.IsNullOrEmpty(workingDir))
+                        Directory.SetCurrentDirectory(workingDir);
+                    var setup = AppDomain.CurrentDomain.SetupInformation;
+                    setup.ShadowCopyFiles = "true";
+                    var appDomain = AppDomain.CreateDomain(exeFile, AppDomain.CurrentDomain.Evidence, setup);
+                    appDomain.ExecuteAssembly(exeFile, CommandLineToArgs(commandLine));
+                }
+                else
+                {
+                    p.StartInfo.Arguments = commandLine;
+                    p.StartInfo.FileName = exeFile;
+                    p.StartInfo.WorkingDirectory = workingDir;
+                    p.Start();
                 }
             }
             catch (Exception ex)
