@@ -69,7 +69,7 @@ namespace AppRunner
                 }
                 else
                 {
-                    p.StartInfo.Arguments = commandLine;
+                    p.StartInfo.Arguments = Environment.ExpandEnvironmentVariables(commandLine);
                     p.StartInfo.FileName = exeFile;
                     p.StartInfo.WorkingDirectory = workingDir;
                     p.Start();
