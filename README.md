@@ -14,7 +14,7 @@ Here's an example of `AppRunner.settings` file
 ExeFile=x:\fireflymigration\northwind\northwind.exe
 WorkingDir=x:\fireflymigration\northwind
 CommandLineArgs=/ini=x:\somewhere\northwind.ini
-ShadowCopyFile=Y
+ShadowCopyFiles=Y
 ```
 
 
