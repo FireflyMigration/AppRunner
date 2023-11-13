@@ -17,9 +17,18 @@ namespace AppRunner
             string workingDir = "";
             string CommandLineArgs = "";
             var shadowCopyFiles = false;
+            var Exe = System.Reflection.Assembly.GetEntryAssembly();
+            var WorkingDir = System.IO.Directory.GetCurrentDirectory();
+            var path = Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName);
+            var ExeLocation = Path.GetDirectoryName(Exe.Location);
+
+            //In case the Working directory in the Shortcut is not the same as the AppRunner.exe location
+            if (Exe.Location != WorkingDir)
+                path = ExeLocation + "\\"+path;
+
             try
             {
-                using (var sr = new StreamReader(Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName) + ".settings"))
+                using (var sr = new StreamReader(path + ".settings"))
                 {
                     string line;
                     while ((line = sr.ReadLine()) != null)
