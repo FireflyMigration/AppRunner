@@ -46,7 +46,7 @@ namespace AppRunner
                                     exeFile = value;
                                     break;
                                 case "WORKINGDIR":
-                                    workingDir = value;
+                                    workingDir = Environment.ExpandEnvironmentVariables(value);
                                     break;
                                 case "COMMANDLINEARGS":
                                     CommandLineArgs = Environment.ExpandEnvironmentVariables(value);
