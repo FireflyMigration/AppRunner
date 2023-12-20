@@ -49,7 +49,7 @@ namespace AppRunner
                                     workingDir = value;
                                     break;
                                 case "COMMANDLINEARGS":
-                                    CommandLineArgs = value;
+                                    CommandLineArgs = Environment.ExpandEnvironmentVariables(value);
                                     break;
                                 case "SHADOWCOPYFILES":
                                     shadowCopyFiles = value.Equals("Y", StringComparison.InvariantCultureIgnoreCase);
