@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Web;
 
 namespace AppRunner
 {
@@ -26,6 +27,13 @@ namespace AppRunner
             if (Exe.Location != WorkingDir)
                 path = ExeLocation + "\\"+path;
 
+            // In case commandline arguments are added in the AppRunner shortcut
+            var commandArgs = string.Empty;
+            foreach (var item in args)
+            {
+                commandArgs +=" "+item;
+            }
+                        
             try
             {
                 using (var sr = new StreamReader(path + ".settings"))
@@ -49,7 +57,7 @@ namespace AppRunner
                                     workingDir = Environment.ExpandEnvironmentVariables(value);
                                     break;
                                 case "COMMANDLINEARGS":
-                                    CommandLineArgs = Environment.ExpandEnvironmentVariables(value);
+                                    CommandLineArgs = Environment.ExpandEnvironmentVariables(value+" "+commandArgs);
                                     break;
                                 case "SHADOWCOPYFILES":
                                     shadowCopyFiles = value.Equals("Y", StringComparison.InvariantCultureIgnoreCase);
